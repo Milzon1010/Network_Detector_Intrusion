@@ -21,16 +21,19 @@ if os.path.exists(background_image):
     st.markdown(f"""
     <style>
     .stApp {{
-        background-image: url("data:image/png;base64,{img_base64}");
+        background-image: url("data:image/jpeg;base64,{img_base64}");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
         background-position: center;
     }}
     .stApp > div:first-child {{
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
         padding: 2rem;
         border-radius: 12px;
+        margin-left: 0 !important;
+        text-align: left !important;
     }}
     section[data-testid="stSidebar"] > div:first-child {{
         background-color: rgba(30, 30, 30, 0.8);
@@ -66,45 +69,47 @@ page = st.sidebar.radio("Pilih halaman:", ("Upload & Home", "Analysis Summary", 
 if "df" not in st.session_state:
     st.session_state["df"] = pd.DataFrame()
 
-if page == "Upload & Home":
-    st.title("📁 Network Intrusion Detection Dashboard")
-    st.markdown("Silakan upload file .pcap atau .csv untuk mulai analisis.")
+col1, _ = st.columns([0.65, 0.35])
+with col1:
+    if page == "Upload & Home":
+        st.title("📁 Network Intrusion Detection Dashboard")
+        st.markdown("Silakan upload file .pcap atau .csv untuk mulai analisis.")
 
-    uploaded_file = st.file_uploader("Upload file PCAP atau CSV:", type=["pcap", "pcapng", "csv"])
+        uploaded_file = st.file_uploader("Upload file PCAP atau CSV:", type=["pcap", "pcapng", "csv"])
 
-    if uploaded_file is not None:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded_file.name).suffix) as tmp_file:
-            tmp_file.write(uploaded_file.read())
-            tmp_path = tmp_file.name
+        if uploaded_file is not None:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded_file.name).suffix) as tmp_file:
+                tmp_file.write(uploaded_file.read())
+                tmp_path = tmp_file.name
 
-        df = parse_pcap_auto(tmp_path)
+            df = parse_pcap_auto(tmp_path)
 
-        if df is not None and not df.empty:
-            st.session_state["df"] = df
-            st.success(f"✅ File berhasil diproses! Jumlah baris: {len(df)}")
+            if df is not None and not df.empty:
+                st.session_state["df"] = df
+                st.success(f"✅ File berhasil diproses! Jumlah baris: {len(df)}")
+            else:
+                st.error("❌ Gagal memproses file atau data kosong.")
+
+    elif page == "Analysis Summary":
+        if st.session_state["df"].empty:
+            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
         else:
-            st.error("❌ Gagal memproses file atau data kosong.")
+            show_analysis_summary()
 
-elif page == "Analysis Summary":
-    if st.session_state["df"].empty:
-        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-    else:
-        show_analysis_summary()
+    elif page == "Anomaly Detection":
+        if st.session_state["df"].empty:
+            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+        else:
+            show_anomaly_detection(st.session_state["df"])
 
-elif page == "Anomaly Detection":
-    if st.session_state["df"].empty:
-        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-    else:
-        show_anomaly_detection(st.session_state["df"])
+    elif page == "PCA Analysis":
+        if st.session_state["df"].empty:
+            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+        else:
+            show_pca_visualization(st.session_state["df"])
 
-elif page == "PCA Analysis":
-    if st.session_state["df"].empty:
-        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-    else:
-        show_pca_visualization(st.session_state["df"])
-
-elif page == "Summary":
-    if st.session_state["df"].empty:
-        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-    else:
-        show_summary(st.session_state["df"])
+    elif page == "Summary":
+        if st.session_state["df"].empty:
+            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+        else:
+            show_summary(st.session_state["df"])
