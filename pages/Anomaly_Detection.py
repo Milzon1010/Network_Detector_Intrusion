@@ -1,23 +1,28 @@
-# pages/03_Anomaly_Detection.py
-
+# anomaly_detection.py
 import streamlit as st
 import pandas as pd
 
-st.header("🚨 Anomaly Detection")
+def show_anomaly_detection(df: pd.DataFrame):
+    st.subheader("🚨 Anomaly Detection")
 
-if 'df' not in st.session_state or st.session_state['df'].empty:
-    st.warning("⚠️ Data belum tersedia.")
-    st.stop()
+    if df.empty:
+        st.warning("Data belum tersedia. Harap upload file PCAP terlebih dahulu.")
+        return
 
-df = st.session_state['df']
+    threshold = 1400
+    anomalies = df[df['length'] > threshold]
 
-st.subheader("📏 Threshold: Panjang paket > 1400 bytes")
-anomaly_df = df[df['length'] > 1400]
+    st.markdown(f"### 🔏 Threshold: Panjang paket > {threshold} bytes")
+    st.markdown(f"Jumlah paket anomali: **{len(anomalies)}**")
 
-st.write(f"Jumlah paket anomali: {len(anomaly_df)}")
-st.dataframe(anomaly_df.head(20))
+    if len(anomalies) > 0:
+        st.success("✅ Anomali terdeteksi dalam data ini.")
+    else:
+        st.info("🔍 Tidak ditemukan anomali berdasarkan panjang paket.")
 
-def run():
-    st.header("📊 Network Summary")
-    df = st.session_state['df']
-    # (isi analisis kamu di sini)
+    if not anomalies.empty:
+        st.dataframe(anomalies)
+
+    st.markdown("---")
+    st.markdown("### 📊 Network Summary")
+    st.dataframe(df.describe(include='all'))
