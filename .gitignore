@@ -1,0 +1,39 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Jupyter/IPython
+.ipynb_checkpoints
+
+# VSCode / PyCharm
+.vscode/
+.idea/
+
+# Virtual environment
+venv/
+.env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Streamlit temporary
+.streamlit/
+
+# Log/temp/output
+*.log
+*.tmp
+*.pdf
+*.csv
+*.pcap
+*.zip
+
+# Environment config
+.env
+.env.*
+
+# Backup or temp files
+*.bak
+*~
