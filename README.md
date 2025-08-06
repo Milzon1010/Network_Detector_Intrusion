@@ -1,164 +1,75 @@
-# 📡 Network Intrusion Detection Dashboard
+# 🧠 Network Intrusion Detector Dashboard
 
-An interactive Streamlit-based dashboard to **analyze, visualize, and detect anomalies** in network traffic from `.pcap` files. Designed for security analysts, educators, and researchers to explore network intrusion patterns using modern data science techniques.
+A Streamlit-based interactive dashboard for analyzing network traffic from `.pcap`, `.pcapng`, or `.csv` files. Built with automated parsing, anomaly detection, and PCA-based visualization, this tool empowers network professionals and students to detect irregularities in traffic flow.
+
+![Banner](background_NIDS.jpg)
 
 ---
 
 ## 🚀 Features
 
-* 📤 **Upload PCAP Files** – Drag & drop or browse `.pcap` / `.pcapng` files to start analysis
-* ⚙️ **Auto Parsing** – Uses `tshark`-based backend to extract structured flow/session data
-* 📈 **Visual Analysis Pages**:
-
-  * **Summary** – IP stats, top ports, traffic volume timeline
-  * **Anomaly Detection** – ML-based anomaly clustering (KMeans, DBSCAN, Isolation Forest)
-  * **PCA Analysis** – Principal Component Analysis for pattern & feature projection
-* 🖼️ **Stylized UI** – Soft blue-gray sidebar, transparent cyber background, dark-themed graphs
-* 💾 **Session Aware** – Upload once, analyze across pages without reprocessing
+- **📂 Easy Upload**: Drag & drop `.pcap`, `.pcapng`, or `.csv` files (max 200MB)
+- **📊 Analysis Summary**: Packet counts, unique IPs, and protocol detection
+- **🚨 Anomaly Detection**: Identify suspiciously large packets (configurable threshold)
+- **🧠 PCA Visualization**: Visualize high-dimensional traffic features for anomaly grouping
+- **📥 Exportable Results**: Summary report (PDF) generation supported
 
 ---
 
-## 📂 Folder Structure
+## 🖥️ Interface Overview
 
-```
-📁 Network_Detector_Intrusion
-├── dashboard_app.py           # Main Streamlit entry point
-├── pages/
-│   ├── Analysis_Summary.py
-│   ├── Anomaly_Detection.py
-│   ├── PCA_Analysis.py
-│   └── Summary.py
-├── core/
-│   └── auto_parser.py         # Handles PCAP parsing using tshark
-├── background_nid.jpg         # UI background image (optional)
-├── requirements.txt           # Python dependencies
-└── output/                    # (Optional) Exported files
-```
+- **Top-left**: Title and logo
+- **Left Sidebar**: Navigation menu (Upload, Summary, Detection, PCA, Export)
+- **Main View**: Dynamic visualizations and results
+- **Background**: Transparent dark theme for readability & visual appeal
 
 ---
 
-## 🛠️ Installation & Setup
+## ⚙️ Tech Stack
 
-### 🔗 Requirements
+- `Python`
+- `Streamlit`
+- `Pandas`
+- `Scikit-learn`
+- `Plotly`
+- `Matplotlib`, `Seaborn`
+- `Tshark`, `pyshark` *(optional, for deeper parsing)*
 
-* Python 3.9+
-* Streamlit
-* Tshark (part of Wireshark CLI tools)
+---
 
-### ⏬ Install Python dependencies:
+## 🧪 How to Run Locally
 
 ```bash
+# Clone the repo
+git clone https://github.com/Milzon1010/Network_Detector_Intrusion.git
+cd Network_Detector_Intrusion
+
+# Set up environment
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Install requirements
 pip install -r requirements.txt
-```
 
-### 🧠 Install Tshark
-
-* **Windows**: Install Wireshark → enable "Tshark in PATH"
-* **Linux**: `sudo apt install tshark`
-* **Mac**: `brew install wireshark`
-
-### ▶️ Run the App
-
-```bash
+# Run Streamlit app
 streamlit run dashboard_app.py
-```
 
-Then open: [http://localhost:8501](http://localhost:8501)
+📁 Sample Folder Structure
+📂 core/
+📂 pages/
+📂 parsers/
+📂 tools/
+📄 dashboard_app.py
+📄 background_NIDS.jpg
 
----
+🌐 Try it Online
+🌍 View the app on Streamlit Cloud
 
-## 💡 Sample Use Cases
+🙋‍♂️ Author
+milzon.ltf@gmail.com
+Machine Learning Enthusiast | 23+ years in Telecom | Exploring AI x Network Intelligence
+📫 Contact: LinkedIn
 
-* 🛡️ Simulate and explore DDoS or ICMP flood patterns
-* 🧪 Evaluate anomaly detection algorithms on real packet data
-* 🧑‍🏫 Teach network security fundamentals with visual aids
-* 📊 Extract insights from traffic capture during pentesting or lab experiments
+📄 License
+This project is open source under the MIT License.
 
----
-
-## 📸 Screenshots
-
-
-
----
-
-## 🙌 Contributors
-
-👤 [Milzon](https://www.linkedin.com/in/milzon) – Telecom & AI Enthusiast, Network Infra + AI Transition
-
----
-
-## 📜 License
-
-This project is open-source for educational and non-commercial research use.
-
----
-
-## ✅ To Do (Next Milestones)
-
-*🔧 Fungsionalitas Tambahan
- Export ke PDF/CSV
-
-Tombol Download PDF Summary atau Export to CSV
-
-Gunakan fpdf atau pdfkit
-
- Session Reset Button
-
-Tombol "🔄 Reset Data" di sidebar untuk clear session state
-
- Multiple File Upload Support
-
-Gabungkan file .pcap atau batch-analisis beberapa file sekaligus
-
- Filter Interaktif
-
-Filter IP, port, protokol, rentang waktu, dll langsung di sidebar
-
- Auto-save ke output/ folder
-
-Setiap parsing → simpan csv + summary.json
-
-📊 Visualisasi & Analitik
- Heatmap komunikasi IP (src vs dst)
-
- Timeline Interaktif (hourly/daily trend)
-
- Packet Size Distribution
-
- Anomaly Explanation (SHAP, feature importance)
-
-🧠 ML & Security Enhancements
- Signature-based Detection
-
-Integrasi Suricata/Zeek atau regex rule sederhana
-
- Model Training Page
-
-Bisa latih model anomaly detection dari file .csv baru
-
- Explainable ML
-
-Gunakan PCA loading matrix atau LIME/SHAP untuk jelaskan anomali
-
-🌐 Web & Deployment
- Streamlit Cloud or HuggingFace Space
-
-Live link publik untuk portfolio / demo recruiter
-
- Add Login (optional)
-
-Dengan streamlit-authenticator agar bisa multi-user
-
- Auto-delete file lama
-
-Jika disimpan di server, jaga agar storage nggak penuh
-
-🧾 Dokumentasi & Branding
- README Bahasa Indonesia
-
- Tambah badge GitHub (stars, license, last update)
-
- Demo Video YouTube (pakai narasi kamu)
-
- LinkedIn carousel post: “Dari packet capture jadi insight”
