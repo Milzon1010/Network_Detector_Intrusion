@@ -1,0 +1,5 @@
+core
+output
+pages
+parsers
+temp_uploaded

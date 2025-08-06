@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 import pandas as pd
 import os
@@ -6,110 +7,125 @@ import tempfile
 from pathlib import Path
 
 from core.auto_parser import parse_pcap_auto
-from pages.Analysis_Summary import run as show_analysis_summary
+from pages.Analysis_Summary import show_analysis_summary
 from pages.Anomaly_Detection import show_anomaly_detection
 from pages.PCA_Analysis import show_pca_visualization
 from pages.Summary import show_summary
 
-background_image = "background_nid.jpg"
+# === SET PAGE TITLE ===
+st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wide")
 
+# === BACKGROUND IMAGE SETUP ===
+background_image = "background_NIDS.jpg"
 if os.path.exists(background_image):
     with open(background_image, "rb") as img_file:
         img_bytes = img_file.read()
         img_base64 = base64.b64encode(img_bytes).decode()
 
-    st.markdown(f"""
+        st.markdown(f"""
     <style>
     .stApp {{
-        background-image: url("data:image/jpeg;base64,{img_base64}");
+        background-image: url("data:image/jpg;base64,{img_base64}");
         background-size: cover;
         background-repeat: no-repeat;
         background-attachment: fixed;
         background-position: center;
     }}
-    .stApp > div:first-child {{
-        background-color: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(4px);
-        padding: 2rem;
-        border-radius: 12px;
-        margin-left: 0 !important;
-        text-align: left !important;
-    }}
     section[data-testid="stSidebar"] > div:first-child {{
-        background-color: rgba(30, 30, 30, 0.8);
-        color: white;
+        background-color: rgba(0, 24, 48, 0.85);
+    }}
+    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
+        color: #ffeb8a !important;
     }}
     h1, h2, h3, h4 {{
-        color: #fff !important;
-        text-shadow: 1px 1px 4px black;
+        color: #ffffff !important;
+        text-shadow: 2px 2px 5px black;
     }}
-    p, li {{
+    p, li, span {{
         color: #f0f0f0 !important;
         text-shadow: 1px 1px 2px black;
     }}
-    .stMarkdown span {{
-        text-shadow: 1px 1px 2px black;
-    }}
-    .stButton > button, .stDownloadButton > button {{
-        background-color: #1f77b4;
-        color: white;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-    }}
-    .stButton > button:hover, .stDownloadButton > button:hover {{
-        background-color: #1666a2;
+    .upload-box {{
+        background-color: rgba(0,0,0,0.6);
+        padding: 2rem;
+        border-radius: 12px;
+        width: 40%;
+        margin-left: 1rem;
+        box-shadow: 0 0 15px rgba(0,0,0,0.4);
     }}
     </style>
     """, unsafe_allow_html=True)
+else:
+    st.warning("⚠️ Background image tidak ditemukan.")
 
-st.sidebar.title("📂 Navigasi Halaman")
-page = st.sidebar.radio("Pilih halaman:", ("Upload & Home", "Analysis Summary", "Anomaly Detection", "PCA Analysis", "Summary"))
+# === SIDEBAR NAVIGASI ===
+st.sidebar.title("Navigasi Halaman")
+page = st.sidebar.radio("Pilih halaman:", (
+    "Upload & Home",
+    "Analysis Summary",
+    "Anomaly Detection",
+    "PCA Analysis",
+    "Summary"
+))
 
+# === INIT SESSION STATE DF ===
 if "df" not in st.session_state:
     st.session_state["df"] = pd.DataFrame()
 
-col1, _ = st.columns([0.65, 0.35])
-with col1:
-    if page == "Upload & Home":
-        st.title("📁 Network Intrusion Detection Dashboard")
-        st.markdown("Silakan upload file .pcap atau .csv untuk mulai analisis.")
+# === UPLOAD & HOME ===
+if page == "Upload & Home":
+    st.markdown("<h1 style='text-align: left;'>📁 Network Intrusion Detection<br>Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("Silakan upload file <code>.pcap</code>, <code>.pcapng</code>, atau <code>.csv</code> untuk memulai analisis.", unsafe_allow_html=True)
 
-        uploaded_file = st.file_uploader("Upload file PCAP atau CSV:", type=["pcap", "pcapng", "csv"])
+    st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader(
+        "Upload file:",
+        type=["pcap", "pcapng", "csv"],
+        help="Limit 200MB per file – PCAP, PCAPNG, CSV"
+    )
 
-        if uploaded_file is not None:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded_file.name).suffix) as tmp_file:
-                tmp_file.write(uploaded_file.read())
-                tmp_path = tmp_file.name
+    if uploaded_file is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded_file.name).suffix) as tmp_file:
+            tmp_file.write(uploaded_file.read())
+            tmp_path = tmp_file.name
 
-            df = parse_pcap_auto(tmp_path)
+        df = parse_pcap_auto(tmp_path)
 
-            if df is not None and not df.empty:
-                st.session_state["df"] = df
-                st.success(f"✅ File berhasil diproses! Jumlah baris: {len(df)}")
-            else:
-                st.error("❌ Gagal memproses file atau data kosong.")
-
-    elif page == "Analysis Summary":
-        if st.session_state["df"].empty:
-            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+        if df is not None and not df.empty:
+            st.session_state["df"] = df
+            st.success(f"✅ File berhasil diproses! Jumlah baris: {len(df)}")
+            st.markdown("### Contoh Data:")
+            st.dataframe(df.head(10), use_container_width=True)
         else:
-            show_analysis_summary()
+            st.error("❌ Gagal memproses file atau data kosong.")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    elif page == "Anomaly Detection":
-        if st.session_state["df"].empty:
-            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-        else:
-            show_anomaly_detection(st.session_state["df"])
+# === ANALYSIS SUMMARY ===
+elif page == "Analysis Summary":
+    if st.session_state["df"].empty:
+        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+    else:
+        show_analysis_summary()
 
-    elif page == "PCA Analysis":
-        if st.session_state["df"].empty:
-            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-        else:
-            show_pca_visualization(st.session_state["df"])
+# === ANOMALY DETECTION ===
+elif page == "Anomaly Detection":
+    df = st.session_state.get("df", pd.DataFrame())
+    if df.empty:
+        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+    else:
+        show_anomaly_detection(df)
 
-    elif page == "Summary":
-        if st.session_state["df"].empty:
-            st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
-        else:
-            show_summary(st.session_state["df"])
+# === PCA ANALYSIS ===
+elif page == "PCA Analysis":
+    df = st.session_state.get("df", pd.DataFrame())
+    if df.empty:
+        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+    else:
+        show_pca_visualization(df)
+
+# === SUMMARY ===
+elif page == "Summary":
+    if st.session_state["df"].empty:
+        st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
+    else:
+        show_summary(st.session_state["df"])
