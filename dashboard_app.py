@@ -129,3 +129,5 @@ elif page == "Summary":
         st.warning("⚠️ Belum ada data. Silakan upload file terlebih dahulu.")
     else:
         show_summary(st.session_state["df"])
+
+# ✅ UI Enhanced by Milzon, Aug 2025
