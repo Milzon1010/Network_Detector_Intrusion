@@ -40,40 +40,40 @@ if os.path.exists(background_image_path):
         img_bytes = img_file.read()
         img_base64 = base64.b64encode(img_bytes).decode()
 
+    # ⬇️ TIDAK BOLEH ADA INDENT DI SINI
     st.markdown(f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/jpg;base64,{img_base64}");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-position: center;
-    }}
-    section[data-testid="stSidebar"] > div:first-child {{
-        background-color: rgba(0, 24, 48, 0.85);
-    }}
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
-        color: #ffeb8a !important;
-    }}
-    h1, h2, h3, h4 {{
-        color: #ffffff !important;
-        text-shadow: 2px 2px 5px black;
-    }}
-    p, li, span {{
-        color: #f0f0f0 !important;
-        text-shadow: 1px 1px 2px black;
-    }}
-    .upload-box {{
-        background-color: rgba(0,0,0,0.6);
-        padding: 2rem;
-        border-radius: 12px;
-        width: 40%;
-        margin-left: 1rem;
-        box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-
+<style>
+.stApp {{
+    background-image: url("data:image/jpg;base64,{img_base64}");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+}}
+section[data-testid="stSidebar"] > div:first-child {{
+    background-color: rgba(0, 24, 48, 0.85);
+}}
+section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
+    color: #ffeb8a !important;
+}}
+h1, h2, h3, h4 {{
+    color: #ffffff !important;
+    text-shadow: 2px 2px 5px black;
+}}
+p, li, span {{
+    color: #f0f0f0 !important;
+    text-shadow: 1px 1px 2px black;
+}}
+.upload-box {{
+    background-color: rgba(0,0,0,0.6);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 40%;
+    margin-left: 1rem;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+}}
+</style>
+""", unsafe_allow_html=True)
 else:
     st.warning("⚠️ Background image tidak ditemukan.")
 
