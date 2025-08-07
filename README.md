@@ -54,6 +54,37 @@ pip install -r requirements.txt
 # Run Streamlit app
 streamlit run dashboard_app.py
 
+⚠️ Deployment Notes
+✅ Local Deployment: Works fine if tshark is installed on your system
+To install:
+# Ubuntu / Debian
+sudo apt install tshark
+
+# macOS
+brew install wireshark
+
+# Windows
+Download Wireshark: https://www.wireshark.org/
+Make sure `tshark` is in your system PATH
+
+❌ Streamlit Cloud Limitation:
+Streamlit Cloud does not support tshark installation.
+As a result:
+
+.pcap or .pcapng parsing will fail
+
+Only .csv uploads are supported in cloud deployments
+
+✅ Workaround for Cloud Users
+To ensure your dashboard works on Streamlit Cloud:
+
+✔️ Use .csv exports from tools like Wireshark (File → Export Packet Dissections → As CSV)
+
+❌ Do not upload .pcap / .pcapng unless tshark is refactored out
+
+📌 Roadmap Note
+We plan to replace pyshark with a scapy-based parser to remove system dependencies and support full cloud deployment in future versions.
+
 📁 Sample Folder Structure
 📂 core/
 📂 pages/
