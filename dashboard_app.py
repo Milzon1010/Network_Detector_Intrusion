@@ -12,6 +12,23 @@ from pages.Anomaly_Detection import show_anomaly_detection
 from pages.PCA_Analysis import show_pca_visualization
 from pages.Summary import show_summary
 
+# ===== DEBUG STARTUP LOG =====
+st.markdown("✅ App started (milzon debug)")
+st.markdown("### 📂 File di direktori saat ini:")
+try:
+    st.code("\n".join(os.listdir(".")))
+except Exception as e:
+    st.error(f"Gagal list root dir: {e}")
+
+if os.path.exists("assets"):
+    st.markdown("### 📁 Isi folder /assets:")
+    try:
+        st.code("\n".join(os.listdir("assets")))
+    except Exception as e:
+        st.error(f"Gagal list isi assets/: {e}")
+else:
+    st.warning("❗ Folder assets tidak ditemukan!")
+
 # === SET PAGE TITLE ===
 st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wide")
 
@@ -19,43 +36,43 @@ st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wi
 background_image_path = "assets/background_NIDS.jpg"
 
 if os.path.exists(background_image_path):
-     with open(background_image_path, "rb") as img_file:
+    with open(background_image_path, "rb") as img_file:
         img_bytes = img_file.read()
         img_base64 = base64.b64encode(img_bytes).decode()
 
         st.markdown(f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/jpg;base64,{img_base64}");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-position: center;
-    }}
-    section[data-testid="stSidebar"] > div:first-child {{
-        background-color: rgba(0, 24, 48, 0.85);
-    }}
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
-        color: #ffeb8a !important;
-    }}
-    h1, h2, h3, h4 {{
-        color: #ffffff !important;
-        text-shadow: 2px 2px 5px black;
-    }}
-    p, li, span {{
-        color: #f0f0f0 !important;
-        text-shadow: 1px 1px 2px black;
-    }}
-    .upload-box {{
-        background-color: rgba(0,0,0,0.6);
-        padding: 2rem;
-        border-radius: 12px;
-        width: 40%;
-        margin-left: 1rem;
-        box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{img_base64}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+        }}
+        section[data-testid="stSidebar"] > div:first-child {{
+            background-color: rgba(0, 24, 48, 0.85);
+        }}
+        section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span {{
+            color: #ffeb8a !important;
+        }}
+        h1, h2, h3, h4 {{
+            color: #ffffff !important;
+            text-shadow: 2px 2px 5px black;
+        }}
+        p, li, span {{
+            color: #f0f0f0 !important;
+            text-shadow: 1px 1px 2px black;
+        }}
+        .upload-box {{
+            background-color: rgba(0,0,0,0.6);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 40%;
+            margin-left: 1rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+        }}
+        </style>
+        """, unsafe_allow_html=True)
 else:
     st.warning("⚠️ Background image tidak ditemukan.")
 
@@ -131,4 +148,4 @@ elif page == "Summary":
     else:
         show_summary(st.session_state["df"])
 
-# ✅ UI Enhanced by Milzon, Aug 2025
+# ✅ NID_ Milzon-QG-Ramin, Aug 2025
