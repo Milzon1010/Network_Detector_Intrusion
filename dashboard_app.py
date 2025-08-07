@@ -6,6 +6,9 @@ import base64
 import tempfile
 from pathlib import Path
 
+# === SET PAGE TITLE ===
+st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wide")
+
 from core.auto_parser import parse_pcap_auto
 from pages.Analysis_Summary import show_analysis_summary
 from pages.Anomaly_Detection import show_anomaly_detection
@@ -29,8 +32,6 @@ if os.path.exists("assets"):
 else:
     st.warning("❗ Folder assets tidak ditemukan!")
 
-# === SET PAGE TITLE ===
-st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wide")
 
 # === BACKGROUND IMAGE SETUP ===
 background_image_path = "assets/background_NIDS.jpg"
