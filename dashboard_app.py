@@ -16,9 +16,10 @@ from pages.Summary import show_summary
 st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wide")
 
 # === BACKGROUND IMAGE SETUP ===
-background_image = "background_NIDS.jpg"
-if os.path.exists(background_image):
-    with open(background_image, "rb") as img_file:
+background_image_path = "assets/background_NIDS.jpg"
+
+if os.path.exists(background_image_path):
+     with open(background_image_path, "rb") as img_file:
         img_bytes = img_file.read()
         img_base64 = base64.b64encode(img_bytes).decode()
 
