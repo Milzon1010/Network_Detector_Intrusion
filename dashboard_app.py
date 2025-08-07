@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import streamlit as st
 import pandas as pd
-import os
 import base64
 import tempfile
 from pathlib import Path
 
 # === SET PAGE TITLE ===
 st.set_page_config(page_title="Network Intrusion Detector Dashboard", layout="wide")
+
+sys.path.append(".")
 
 from core.auto_parser import parse_pcap_auto
 from pages.Analysis_Summary import show_analysis_summary
