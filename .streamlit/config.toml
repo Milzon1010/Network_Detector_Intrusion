@@ -1,13 +1,17 @@
 [server]
-headless = true
+headless = false
+enableXsrfProtection = false
 enableCORS = false
+
+[browser]
+serverAddress = "localhost"
+serverPort = 8501
+gatherUsageStats = false
+
 [theme]
-base="dark"
-primaryColor="#1f77b4"
-backgroundColor="#0e1117"
-secondaryBackgroundColor="#262730"
-textColor="#FAFAFA"
-font="sans serif"
-[server]
-headless = true
-enableCORS = false
+base = "dark"
+primaryColor = "#1f77b4"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#FAFAFA"
+font = "sans serif"

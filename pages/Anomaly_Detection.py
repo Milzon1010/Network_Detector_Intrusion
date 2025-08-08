@@ -1,55 +1,100 @@
+# pages/Anomaly_Detection.py
+from __future__ import annotations
+"""
+Anomaly Detection – ringan, aman, dan bisa di-scale.
+
+Strategi:
+- Default pakai Z-score di kolom `length` (cepat, no-RAM drama).
+- Opsi IsolationForest (sklearn) dengan sampling otomatis (maks 50k baris).
+- Guardrail kolom: butuh minimal kolom `length`. Bonus fitur (src/dst) dipakai untuk konteks, bukan syarat.
+- Tabel hasil dibatasi (TOP_N) agar UI responsif.
+"""
+
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+from sklearn.ensemble import IsolationForest
 
-def show_anomaly_detection(df: pd.DataFrame):
+TOP_N = 200      # tampilkan maksimal 200 anomali
+MAX_IF_ROWS = 50_000  # batas sampel untuk IsolationForest
+
+def _ensure_length(df: pd.DataFrame) -> pd.Series:
+    if "length" not in df.columns:
+        raise ValueError("Kolom `length` tidak ditemukan.")
+    return pd.to_numeric(df["length"], errors="coerce").fillna(0)
+
+def _zscore_anomaly(df: pd.DataFrame, z_cut: float = 3.0) -> pd.DataFrame:
+    length = _ensure_length(df)
+    mu = length.mean()
+    sigma = length.std() if length.std() > 0 else 1.0
+    z = (length - mu) / sigma
+    out = df.copy()
+    out["z_score_len"] = z
+    out["is_anomaly"] = (z.abs() >= z_cut).astype(int)
+    return out[out["is_anomaly"] == 1].sort_values("z_score_len", key=lambda s: s.abs(), ascending=False)
+
+def _iforest_anomaly(df: pd.DataFrame, contamination: float = 0.01, max_rows: int = MAX_IF_ROWS) -> pd.DataFrame:
+    length = _ensure_length(df)
+    feat = pd.DataFrame({"length": length})
+    # sampling agar cepat
+    if len(feat) > max_rows:
+        feat = feat.sample(max_rows, random_state=42)
+        base = df.loc[feat.index].copy()
+    else:
+        base = df.copy()
+
+    model = IsolationForest(n_estimators=100, contamination=contamination, random_state=42, n_jobs=-1)
+    y = model.fit_predict(feat)  # -1 anomaly, 1 normal
+    score = model.decision_function(feat)
+
+    base = base.assign(if_pred=y, if_score=score)
+    out = base[base["if_pred"] == -1].sort_values("if_score")
+    return out
+
+def show_anomaly_detection(df: pd.DataFrame) -> None:
     st.subheader("🚨 Anomaly Detection")
 
-    if df.empty:
-        st.warning("Data belum tersedia. Harap upload file PCAP terlebih dahulu.")
+    if df is None or df.empty:
+        st.warning("⚠️ Data belum tersedia. Upload file dulu ya.")
         return
 
-    threshold = 1400
-    anomalies = df[df['length'] > threshold]
+    # Metode & Parameter
+    method = st.selectbox("Metode", ["Z-Score (Length)", "Isolation Forest"])
+    c1, c2 = st.columns(2)
 
-    st.markdown(f"### 🔏 Threshold: Panjang paket > {threshold} bytes")
-    st.markdown(f"Jumlah paket anomali: **{len(anomalies)}**")
-
-    if len(anomalies) > 0:
-        st.success("✅ Anomali terdeteksi dalam data ini.")
-    else:
-        st.info("🔍 Tidak ditemukan anomali berdasarkan panjang paket.")
-
-    # Tampilkan tabel anomali (Top 20)
-    if not anomalies.empty:
-        st.markdown("### 📋 Daftar Paket Anomali (Top 20)")
-        st.dataframe(anomalies.head(20))
-
-    # Distribusi Panjang Paket (Histogram)
-    if 'length' in df.columns:
-        st.markdown("### 📊 Distribusi Panjang Paket")
+    if method == "Z-Score (Length)":
+        z_cut = c1.slider("Ambang |z-score|", min_value=2.0, max_value=6.0, value=3.0, step=0.5)
         try:
-            length_clean = pd.to_numeric(df['length'], errors='coerce').dropna()
-
-            if length_clean.empty:
-                st.warning("⚠️ Tidak ada data numerik yang valid pada kolom 'length'.")
-            else:
-                fig, ax = plt.subplots(figsize=(10, 5))
-                ax.hist(length_clean, bins=50, alpha=0.7, color='skyblue', edgecolor='black')
-                ax.axvline(x=threshold, color='red', linestyle='--', linewidth=2, label=f'Threshold {threshold} bytes')
-                ax.set_title("Distribusi Panjang Paket")
-                ax.set_xlabel("Panjang Paket (bytes)")
-                ax.set_ylabel("Frekuensi")
-                ax.legend()
-                ax.grid(True, linestyle='--', alpha=0.5)
-                st.pyplot(fig)
-                plt.close(fig)
-
+            with st.spinner("Menghitung z-score..."):
+                res = _zscore_anomaly(df, z_cut=z_cut)
         except Exception as e:
-            st.error(f"❌ Gagal membuat grafik distribusi panjang paket: {e}")
+            st.error(f"Gagal deteksi anomali (Z-score): {e}")
+            return
 
-    # Insight & interpretasi
-    st.markdown("### 🧠 Insight:")
-    st.markdown("- Panjang paket besar (>1400 byte) dapat mengindikasikan file transfer mencurigakan.")
-    st.markdown("- Jika frekuensi anomali tinggi, periksa jenis protokol yang digunakan.")
-    st.markdown("- Pantau sumber IP dari paket-paket besar.")
+        if res.empty:
+            st.info("Tidak ditemukan anomali dengan ambang saat ini.")
+            return
+
+        # Tampilkan ringkas
+        cols_keep = [c for c in ["ts", "src", "dst", "length", "z_score_len"] if c in res.columns]
+        st.markdown(f"#### Hasil (Top {min(TOP_N, len(res)):,})")
+        st.dataframe(res[cols_keep].head(TOP_N), use_container_width=True, height=420)
+
+    else:
+        contamination = c1.slider("Contamination (perkiraan proporsi anomali)", 0.001, 0.05, 0.01, 0.001)
+        try:
+            with st.spinner("Menjalankan Isolation Forest (auto-sample maks 50k baris)..."):
+                res = _iforest_anomaly(df, contamination=contamination, max_rows=MAX_IF_ROWS)
+        except Exception as e:
+            st.error(f"Gagal deteksi anomali (IsolationForest): {e}")
+            return
+
+        if res.empty:
+            st.info("Tidak ditemukan anomali pada sampel/parameter saat ini.")
+            return
+
+        cols_keep = [c for c in ["ts", "src", "dst", "length", "if_score"] if c in res.columns]
+        st.markdown(f"#### Hasil (Top {min(TOP_N, len(res)):,})")
+        st.dataframe(res[cols_keep].head(TOP_N), use_container_width=True, height=420)
+
+    # Hint navigasi
+    st.caption("Tip: Sesuaikan ambang/contamination untuk menyeimbangkan false positive vs. recall.")
